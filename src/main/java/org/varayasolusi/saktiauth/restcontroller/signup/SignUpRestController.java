@@ -1,0 +1,45 @@
+package org.varayasolusi.saktiauth.restcontroller.signup;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import org.varayasolusi.saktiauth.context.signup.SignUpService;
+
+@RestController
+@RequestMapping("/v1/sign-up")
+public class SignUpRestController {
+
+	@Autowired
+	private SignUpService signUpService;
+	
+	@PostMapping("")
+	public ResponseEntity<Object> addNew(@RequestBody SignUpReqModel signUpReqModel) {
+		
+		ResponseEntity<Object> responseEntity = null;
+		
+		try {
+
+			var responseModel = this.signUpService.addNew(signUpReqModel);
+
+			responseEntity = ResponseEntity
+                    .status(responseModel.getHttpStatusCode())
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(responseModel);
+			
+		}
+		catch(Exception ex) {
+            responseEntity = ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .contentType(MediaType.TEXT_PLAIN)
+                    .body(ex.getMessage());
+        }
+
+        return responseEntity;
+	}
+
+}
