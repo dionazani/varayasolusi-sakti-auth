@@ -31,6 +31,8 @@ public class AppUserPersonEntity {
 
 	private short isLock;
 	
+	private String userPersonStatus;
+	
 	@CreationTimestamp
 	@Column(name="created_at")
 	private Timestamp createdAt;

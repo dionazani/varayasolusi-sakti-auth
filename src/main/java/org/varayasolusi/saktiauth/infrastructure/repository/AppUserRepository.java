@@ -13,4 +13,5 @@ public interface AppUserRepository extends CrudRepository<AppUserEntity, UUID>{
 
 	@Query(value="SELECT au FROM AppUserEntity au WHERE au.email = :email")
 	AppUserEntity findByEmail(@Param("email") String email);
+
 }

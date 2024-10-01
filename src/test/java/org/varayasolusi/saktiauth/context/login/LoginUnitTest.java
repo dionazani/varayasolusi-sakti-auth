@@ -5,7 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.varayasolusi.saktiauth.restcontroller.login.LoginReqModel;
+import org.varayasolusi.saktiauth.context.v1.login.LoginReqModel;
+import org.varayasolusi.saktiauth.context.v1.login.LoginService;
 
 @SpringBootTest
 public class LoginUnitTest {

@@ -25,7 +25,4 @@ public class AppUserAuthenticatedEntity {
     
     private String tokenValue;
     
-    private Timestamp loginAt;
-    
-    private Timestamp logoutAt;
 }

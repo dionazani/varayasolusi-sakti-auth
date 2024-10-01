@@ -24,7 +24,11 @@ public class AppUserEntity {
     @Column(name="created_at")
     private Timestamp createdAt;
     
+    private Timestamp updateAt;
+    
 	private String email;
 
 	private String mobilePhone;
+	
+	private String appUserName;
 }
