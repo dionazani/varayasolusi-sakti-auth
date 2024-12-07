@@ -4,8 +4,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -16,14 +18,13 @@ public class AuthenticationRestController {
 	@Autowired
 	private AuthenticationService authenticationService;
 	
-	@PostMapping(path= "/", consumes = "application/json", produces = "application/json")
-    public ResponseEntity<Object> authenticate(@RequestBody AuthenticatonReqModel authenticatonReqModel) {
+	@GetMapping(path= "/", produces = "application/json")
+    public ResponseEntity<Object> authenticate(@RequestHeader(name="Authorization") String token) {
 
 		ResponseEntity<Object> responseEntity = null;
         try {
         	
-
-            var responseModel = this.authenticationService.authenticate(authenticatonReqModel);
+            var responseModel = this.authenticationService.authenticate(token.substring(7));
             
             responseEntity = ResponseEntity
                     .status(responseModel.getHttpStatusCode())

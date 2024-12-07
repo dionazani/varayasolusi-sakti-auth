@@ -12,8 +12,8 @@ public class LoginRepositoryCustom {
 
     public AppUserPersonEntityCustom getAppUserByEmail(String email) {
 
-        String sql = "select app_user_person.id  as app_user_person_id,\n"
-                + "		app_user.id  as app_user_id,\n"
+        String sql = "select app_user.id  as app_user_id, \n"
+    		+ "			app_user_person.id  as app_user_person_id,\n"
                 + "		app_user.email,\n"
                 + "		app_user_person.\"password\"\n"
                 + "from app_user_person inner join app_user on app_user.id = app_user_person.app_user_id\n"

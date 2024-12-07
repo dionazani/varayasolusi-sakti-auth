@@ -2,6 +2,7 @@ package org.varayasolusi.saktiauth.context.v1.login;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -10,9 +11,11 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.varayasolusi.saktiauth.infrastructure.entity.AppUserAuthenticatedEntity;
+import org.varayasolusi.saktiauth.infrastructure.entityredis.UserLoginEntityRedis;
 import org.varayasolusi.saktiauth.infrastructure.model.ResponseModel;
 import org.varayasolusi.saktiauth.infrastructure.repository.AppUserAuthenticatedRepository;
 import org.varayasolusi.saktiauth.infrastructure.repository.AppUserRepository;
+import org.varayasolusi.saktiauth.infrastructure.repositoryredis.UserLoginRepositoryRedis;
 import org.varayasolusi.saktiauth.utils.commons.FormatUtils;
 import org.varayasolusi.saktiauth.utils.commons.JwtTokenManager;
 
@@ -38,9 +41,7 @@ public class LoginServiceImpl implements LoginService {
 	private String applicationTypeWebId;
 	
 	@Autowired
-	private RedisTemplate<String, Object> redisTemplate;
-	
-	private final String SAKTI_AUTH_JWT = "SAKTI_AUTH_JWT";
+	private UserLoginRepositoryRedis userLoginRepositoryRedis;
 	
 	@Override
 	@Transactional
@@ -62,9 +63,6 @@ public class LoginServiceImpl implements LoginService {
 				// delete first app_user_authenticated by app_user_id.
 				this.appUserAuthenticatedRepository.deleteByAppUserId(UUID.fromString(appUserPersonEntityCustom.getAppUserId()));
 				
-				// insert into redis.
-				redisTemplate.opsForValue().set(SAKTI_AUTH_JWT, jwtToken);
-				
 				// insert into AppUserAuthenticatedEntity;
 				var appUserAuthenticatedEntity = new AppUserAuthenticatedEntity();
 				appUserAuthenticatedEntity.setId(UUID.fromString(jwtId));
@@ -72,11 +70,24 @@ public class LoginServiceImpl implements LoginService {
 				appUserAuthenticatedEntity.setAppUserId(UUID.fromString(appUserId));
 				appUserAuthenticatedEntity.setTokenValue(jwtToken);
 				appUserAuthenticatedRepository.save(appUserAuthenticatedEntity);
-	
+				
+				// add to redis, but it need to be deleted first.
+				var userLoginEntityRedis = new UserLoginEntityRedis();
+				userLoginEntityRedis.setAppUserId(appUserId);
+				userLoginEntityRedis.setJwtToken(jwtToken);
+				userLoginEntityRedis.setCreatedAt(String.valueOf(FormatUtils.getCurrentTimestamp()));
+				userLoginEntityRedis.setUpdatedAt(String.valueOf(FormatUtils.getCurrentTimestamp()));
+				this.userLoginRepositoryRedis.save(userLoginEntityRedis);
+				
+				// getRedisById
+				Optional<UserLoginEntityRedis> userLoginEntityRedisToFind = this.userLoginRepositoryRedis.findById(appUserId);
+				String appUserIdFromRedis = userLoginEntityRedisToFind.get().getAppUserId();
+				
 				// set Response by Map;
-
 				Map<String, String> map = new HashMap<String, String>();
 				map.put("token", jwtToken);
+				map.put("appUserId", appUserIdFromRedis);
+				map.put("completeStatus", "002");
 				
 				responseModel = new ResponseModel();
 				responseModel.setHttpStatusCode(200);

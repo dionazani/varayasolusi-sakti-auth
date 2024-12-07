@@ -6,5 +6,5 @@ import org.varayasolusi.saktiauth.infrastructure.model.ResponseModel;
 @Service
 public interface AuthenticationService {
 
-	ResponseModel authenticate(AuthenticatonReqModel authenticatonReqModel);
+	ResponseModel authenticate(String token);
 }

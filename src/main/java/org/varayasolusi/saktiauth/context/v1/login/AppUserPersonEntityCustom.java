@@ -9,8 +9,8 @@ import lombok.Data;
 public class AppUserPersonEntityCustom {
 
 	@Id
-	private String appUserPersonId;
 	private String appUserId;
+	private String appUserPersonId;
 	private String email;
 	private String password;
 }
