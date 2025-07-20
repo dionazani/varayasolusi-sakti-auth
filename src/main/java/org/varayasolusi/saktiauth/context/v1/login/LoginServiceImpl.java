@@ -2,11 +2,9 @@ package org.varayasolusi.saktiauth.context.v1.login;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -14,11 +12,9 @@ import org.varayasolusi.saktiauth.infrastructure.entity.AppUserAuthenticatedEnti
 import org.varayasolusi.saktiauth.infrastructure.entityredis.UserLoginEntityRedis;
 import org.varayasolusi.saktiauth.infrastructure.model.ResponseModel;
 import org.varayasolusi.saktiauth.infrastructure.repository.AppUserAuthenticatedRepository;
-import org.varayasolusi.saktiauth.infrastructure.repository.AppUserRepository;
 import org.varayasolusi.saktiauth.infrastructure.repositoryredis.UserLoginRepositoryRedis;
 import org.varayasolusi.saktiauth.utils.commons.FormatUtils;
 import org.varayasolusi.saktiauth.utils.commons.JwtTokenManager;
-
 import jakarta.persistence.NoResultException;
 import jakarta.transaction.Transactional;
 
@@ -78,10 +74,6 @@ public class LoginServiceImpl implements LoginService {
 				userLoginEntityRedis.setCreatedAt(String.valueOf(FormatUtils.getCurrentTimestamp()));
 				userLoginEntityRedis.setUpdatedAt(String.valueOf(FormatUtils.getCurrentTimestamp()));
 				this.userLoginRepositoryRedis.save(userLoginEntityRedis);
-				
-				// getRedisById
-				Optional<UserLoginEntityRedis> userLoginEntityRedisToFind = this.userLoginRepositoryRedis.findById(appUserId);
-				String appUserIdFromRedis = userLoginEntityRedisToFind.get().getAppUserId();
 				
 				// set Response by Map;
 				Map<String, String> map = new HashMap<String, String>();
