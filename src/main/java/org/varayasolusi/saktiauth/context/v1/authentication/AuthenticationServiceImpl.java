@@ -13,7 +13,6 @@ import org.varayasolusi.saktiauth.infrastructure.repository.AppUserAuthenticated
 import org.varayasolusi.saktiauth.infrastructure.repositoryredis.UserLoginRepositoryRedis;
 import org.varayasolusi.saktiauth.utils.commons.FormatUtils;
 import org.varayasolusi.saktiauth.utils.commons.JwtTokenManager;
-
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jws;
@@ -41,6 +40,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 			// check jwtToken.
 			
 			Jws<Claims> jwtResult = jwtTokenManager.parseJwt(token);
+			
 			String jwtId = jwtResult.getBody().getId();
 			String appUserId = jwtResult.getBody().getSubject();
 			

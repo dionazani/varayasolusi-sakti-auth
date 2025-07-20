@@ -1,18 +1,15 @@
 package org.varayasolusi.saktiauth.utils.commons;
 
 import java.security.Key;
+import java.sql.Timestamp;
+import java.time.Duration;
 import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.Base64;
 import java.util.Date;
-import java.util.UUID;
 import java.util.function.Function;
-
 import javax.crypto.spec.SecretKeySpec;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
-
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
@@ -39,12 +36,19 @@ public class JwtTokenManager {
 
 	public String createJwtToken(String appUserId, String id) { 
 
-		Instant now = Instant.now();
+		Timestamp originalTimestamp = new Timestamp(System.currentTimeMillis());
+		Instant instant = originalTimestamp.toInstant().plus(Duration.ofMinutes(60));
+		Timestamp newTimestamp = Timestamp.from(instant);
+		
+		System.out.println("originalTimestamp :" + originalTimestamp);
+		System.out.println("newTimestamp " + newTimestamp);
+		
 		String jwtToken = Jwts.builder()
-				.setSubject(appUserId)
+				.setIssuer(appUserId)
 				.setId(id)
-				.setIssuedAt(Date.from(now))
-				.setExpiration(Date.from(now.plus(60, ChronoUnit.MINUTES)))
+				.setSubject("TOKEN")
+				.setIssuedAt(originalTimestamp)
+				.setExpiration(newTimestamp)
 				.signWith(hmacKey)
 				.compact();
 
