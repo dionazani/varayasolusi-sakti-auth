@@ -85,12 +85,11 @@ public class LoginServiceImpl implements LoginService {
 				
 				// set Response by Map;
 				Map<String, String> map = new HashMap<String, String>();
-				map.put("token", jwtToken);
-				map.put("appUserId", appUserIdFromRedis);
-				map.put("completeStatus", "002");
-				
+				map.put("accessToken", jwtToken);
+
 				responseModel = new ResponseModel();
 				responseModel.setHttpStatusCode(200);
+				responseModel.setResponseCode("00000");
 		        responseModel.setResponseMessage("succes");
 		        responseModel.setTimeStamp(FormatUtils.getCurrentTimestamp());
 		        responseModel.setData(map);
@@ -99,6 +98,7 @@ public class LoginServiceImpl implements LoginService {
 			else {
 				responseModel = new ResponseModel();
 				responseModel.setHttpStatusCode(401);
+				responseModel.setResponseCode("00000");
 				responseModel.setResponseMessage("unauthorized");
 				responseModel.setTimeStamp(FormatUtils.getCurrentTimestamp());
 				responseModel.setData(null);
@@ -107,6 +107,7 @@ public class LoginServiceImpl implements LoginService {
 		catch(NoResultException nre) {
 			responseModel = new ResponseModel();
 			responseModel.setHttpStatusCode(500);
+			responseModel.setResponseCode("00000");
 	        responseModel.setResponseMessage("error");
 	        responseModel.setTimeStamp(FormatUtils.getCurrentTimestamp());
 	        responseModel.setData(null);

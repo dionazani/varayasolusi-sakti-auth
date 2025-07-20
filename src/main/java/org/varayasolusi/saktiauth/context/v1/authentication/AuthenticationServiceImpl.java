@@ -46,15 +46,16 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 			
 			if (jwtTokenManager.isTokenExpired(token)) {
 				responseModel.setHttpStatusCode(401);
-		        responseModel.setResponseMessage("token expire");
+				responseModel.setResponseCode("00000");
+		        responseModel.setResponseMessage("invalid token");
 		        responseModel.setTimeStamp(FormatUtils.getCurrentTimestamp());
 			}
 			
 			// set response API.
 			Map<String, String> map = new HashMap<String, String>();
-			map.put("appUserId", appUserId);		
-			
+
 			responseModel.setHttpStatusCode(200);
+			responseModel.setResponseCode("00000");
 	        responseModel.setResponseMessage("success");
 	        responseModel.setTimeStamp(FormatUtils.getCurrentTimestamp());
 	        
@@ -74,6 +75,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 				}
 				else {
 					responseModel.setHttpStatusCode(401);
+					responseModel.setResponseCode("00000");
 			        responseModel.setResponseMessage("unauthorized");
 			        responseModel.setTimeStamp(FormatUtils.getCurrentTimestamp());
 			        responseModel.setData(null);
@@ -81,6 +83,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 			}
 		} catch(SignatureException sgx) {
 			responseModel.setHttpStatusCode(500);
+			responseModel.setResponseCode("00000");
 	        responseModel.setResponseMessage("internal server error");
 	        responseModel.setTimeStamp(FormatUtils.getCurrentTimestamp());
 			
@@ -88,6 +91,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 	        
 		} catch(ExpiredJwtException eje) {
 			responseModel.setHttpStatusCode(500);
+			responseModel.setResponseCode("00000");
 	        responseModel.setResponseMessage("internal server error");
 	        responseModel.setTimeStamp(FormatUtils.getCurrentTimestamp());
 	        

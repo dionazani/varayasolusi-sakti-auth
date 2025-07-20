@@ -3,8 +3,6 @@ package org.varayasolusi.saktiauth.infrastructure.entity;
 import jakarta.persistence.*;
 import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.GenericGenerator;
-
 import java.sql.Timestamp;
 import java.util.UUID;
 
