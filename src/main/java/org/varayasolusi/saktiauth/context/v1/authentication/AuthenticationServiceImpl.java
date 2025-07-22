@@ -42,7 +42,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 			Jws<Claims> jwtResult = jwtTokenManager.parseJwt(token);
 			
 			String jwtId = jwtResult.getBody().getId();
-			String appUserId = jwtResult.getBody().getSubject();
+			String appUserId = jwtResult.getBody().getIssuer();
 			
 			if (jwtTokenManager.isTokenExpired(token)) {
 				responseModel.setHttpStatusCode(401);

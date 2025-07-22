@@ -1,13 +1,9 @@
 package org.varayasolusi.saktiauth.infrastructure.entityredis;
 
-import java.sql.Timestamp;
-import java.util.UUID;
 
-import org.hibernate.annotations.CreationTimestamp;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.redis.core.RedisHash;
 import org.springframework.data.redis.core.index.Indexed;
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
