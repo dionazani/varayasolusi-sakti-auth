@@ -9,9 +9,13 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.varayasolusi.saktiauth.infrastructure.entity.AppUserAuthenticatedEntity;
+import org.varayasolusi.saktiauth.infrastructure.entity.AppUserEntity;
+import org.varayasolusi.saktiauth.infrastructure.entity.ApplicationTypeEntity;
 import org.varayasolusi.saktiauth.infrastructure.entityredis.UserLoginEntityRedis;
 import org.varayasolusi.saktiauth.infrastructure.model.ResponseModel;
 import org.varayasolusi.saktiauth.infrastructure.repository.AppUserAuthenticatedRepository;
+import org.varayasolusi.saktiauth.infrastructure.repository.AppUserRepository;
+import org.varayasolusi.saktiauth.infrastructure.repository.ApplicationTypeRepository;
 import org.varayasolusi.saktiauth.infrastructure.repositoryredis.UserLoginRepositoryRedis;
 import org.varayasolusi.saktiauth.utils.commons.FormatUtils;
 import org.varayasolusi.saktiauth.utils.commons.JwtTokenManager;
@@ -32,6 +36,12 @@ public class LoginServiceImpl implements LoginService {
 	
 	@Autowired
 	private AppUserAuthenticatedRepository appUserAuthenticatedRepository;
+	
+	@Autowired
+	private ApplicationTypeRepository applicationTypeRepository;
+	
+	@Autowired
+	private AppUserRepository appUserRepository;
 	
 	@Value("${id.table.applicationType.web}")
 	private String applicationTypeWebId;
@@ -59,11 +69,17 @@ public class LoginServiceImpl implements LoginService {
 				// delete first app_user_authenticated by app_user_id.
 				this.appUserAuthenticatedRepository.deleteByAppUserId(UUID.fromString(appUserPersonEntityCustom.getAppUserId()));
 				
+				// get applicationTypeId
+				ApplicationTypeEntity applicationTypeEntity = applicationTypeRepository.getReferenceById(UUID.fromString(applicationTypeWebId));
+				
+				// get appUserId
+				AppUserEntity appUserEntity = appUserRepository.getReferenceById(UUID.fromString(appUserId));
+				
 				// insert into AppUserAuthenticatedEntity;
 				var appUserAuthenticatedEntity = new AppUserAuthenticatedEntity();
 				appUserAuthenticatedEntity.setId(UUID.fromString(jwtId));
-				appUserAuthenticatedEntity.setApplicationTypeId(UUID.fromString(applicationTypeWebId));
-				appUserAuthenticatedEntity.setAppUserId(UUID.fromString(appUserId));
+				appUserAuthenticatedEntity.setApplicationType(applicationTypeEntity);
+				appUserAuthenticatedEntity.setAppUser(appUserEntity);
 				appUserAuthenticatedEntity.setTokenValue(jwtToken);
 				appUserAuthenticatedRepository.save(appUserAuthenticatedEntity);
 				

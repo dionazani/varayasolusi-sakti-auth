@@ -3,7 +3,6 @@ package org.varayasolusi.saktiauth.context.v1.emailverification;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
-
 import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,7 +21,6 @@ import org.varayasolusi.saktiauth.infrastructure.repository.AppUserSignUpReposit
 import org.varayasolusi.saktiauth.infrastructure.repository.AppUserVerifiedRepository;
 import org.varayasolusi.saktiauth.infrastructure.repository.SignUpRepository;
 import org.varayasolusi.saktiauth.utils.commons.FormatUtils;
-
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;

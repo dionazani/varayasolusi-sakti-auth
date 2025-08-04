@@ -38,7 +38,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 		try {
 			
 			// check jwtToken.
-			
 			Jws<Claims> jwtResult = jwtTokenManager.parseJwt(token);
 			
 			String jwtId = jwtResult.getBody().getId();
