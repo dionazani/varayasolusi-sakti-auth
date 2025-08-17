@@ -3,23 +3,15 @@ package org.varayasolusi.saktiauth.context.v1.emailverification;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
-import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.varayasolusi.saktiauth.infrastructure.entity.AppUserEntity;
-import org.varayasolusi.saktiauth.infrastructure.entity.AppUserPersonEntity;
-import org.varayasolusi.saktiauth.infrastructure.entity.AppUserSignUpEntity;
-import org.varayasolusi.saktiauth.infrastructure.entity.AppUserVerifiedEntity;
+import org.varayasolusi.saktiauth.infrastructure.entity.*;
 import org.varayasolusi.saktiauth.infrastructure.model.ResponseModel;
 import org.varayasolusi.saktiauth.infrastructure.model.SignUpDescModel;
-import org.varayasolusi.saktiauth.infrastructure.repository.AppUserPersonRepository;
-import org.varayasolusi.saktiauth.infrastructure.repository.AppUserRepository;
-import org.varayasolusi.saktiauth.infrastructure.repository.AppUserSignUpRepository;
-import org.varayasolusi.saktiauth.infrastructure.repository.AppUserVerifiedRepository;
-import org.varayasolusi.saktiauth.infrastructure.repository.SignUpRepository;
+import org.varayasolusi.saktiauth.infrastructure.repository.*;
 import org.varayasolusi.saktiauth.utils.commons.FormatUtils;
 import java.util.Calendar;
 import java.util.Date;
@@ -41,13 +33,16 @@ public class EmailVerificationServiceImpl implements EmailVerificationService {
     private AppUserRepository appUserRepository;
 
     @Autowired
-    private AppUserPersonRepository appUserPersonRepository;
+    private AppUserLoginRepository appUserAuthenticationRepository;
     
     @Autowired
     private AppUserVerifiedRepository appUserVerifiedRepository;
     
     @Autowired
     private AppUserSignUpRepository appUserSignUpRepository;
+
+    @Autowired
+    private AppRoleRepository appRoleRepository;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -73,10 +68,10 @@ public class EmailVerificationServiceImpl implements EmailVerificationService {
     	} 
     	
         System.out.println(signUpId);
-        var signUpEntity = signUpRepository.findById(UUID.fromString(signUpId));
+        var signUpEntity = signUpRepository.findById(UUID.fromString(signUpId)).get();
 
         //extract JSON
-        String json = signUpEntity.get().getReqDesc();
+        String json = signUpEntity.getReqDesc();
         ObjectMapper objectMapper = new ObjectMapper();
         var signUpDescModel = objectMapper.readValue(json, SignUpDescModel.class);
 
@@ -99,21 +94,23 @@ public class EmailVerificationServiceImpl implements EmailVerificationService {
 
         this.passwordEncoder = new BCryptPasswordEncoder();
         String passwordHashed = this.passwordEncoder.encode(signUpDescModel.getPassword());
-        
+
+        AppRoleEntity appRoleEntity = appRoleRepository.getReferenceById(UUID.fromString(appRoleIdDebtor));
+
         //insert into app_user_person
-        var appUserPersonEntity = new AppUserPersonEntity();
-        appUserPersonEntity.setAppUserId(UUID.fromString(appUserId));
-        appUserPersonEntity.setAppRoleId(UUID.fromString(appRoleIdDebtor));
-        appUserPersonEntity.setPassword(passwordHashed);
-        appUserPersonEntity.setMustChangePassword(mustChangePasswordShortValue);
-        appUserPersonEntity.setChangePasswordNextDate(dt);
-        appUserPersonEntity.setUserPersonStatus(APP_USER_PERSON_STATUS);
-        this.appUserPersonRepository.save(appUserPersonEntity);
+        var appUserAuthenticationEntity = new AppUserLoginEntity();
+        appUserAuthenticationEntity.setAppUser(appUserEntity);
+        appUserAuthenticationEntity.setAppRole(appRoleEntity);
+        appUserAuthenticationEntity.setPassword(passwordHashed);
+        appUserAuthenticationEntity.setMustChangePassword(mustChangePasswordShortValue);
+        appUserAuthenticationEntity.setChangePasswordNextDate(dt);
+        appUserAuthenticationEntity.setUserPersonStatus(APP_USER_PERSON_STATUS);
+        this.appUserAuthenticationRepository.save(appUserAuthenticationEntity);
 
         // insert into app_user_signup
-        var appUserSignUpEntity = new AppUserSignUpEntity();
-        appUserSignUpEntity.setAppUserId(UUID.fromString(appUserId));
-        appUserSignUpEntity.setSignUpId(UUID.fromString(signUpId));
+        var appUserSignUpEntity = new AppUserSignupEntity();
+        appUserSignUpEntity.setAppUser(appUserEntity);
+        appUserSignUpEntity.setSignUp(signUpEntity);
         this.appUserSignUpRepository.save(appUserSignUpEntity);
         
         // insert into app_user_verified
@@ -151,7 +148,7 @@ public class EmailVerificationServiceImpl implements EmailVerificationService {
     	
     	boolean isExist = true;
     	
-    	Optional<AppUserSignUpEntity> appUserSignUpEntity = Optional.ofNullable(this.appUserSignUpRepository.findBySignUpId(UUID.fromString(signUpId)));
+    	Optional<AppUserSignupEntity> appUserSignUpEntity = Optional.ofNullable(this.appUserSignUpRepository.findBySignUpId(UUID.fromString(signUpId)));
     	isExist = appUserSignUpEntity.isPresent();
     	
     	return isExist;

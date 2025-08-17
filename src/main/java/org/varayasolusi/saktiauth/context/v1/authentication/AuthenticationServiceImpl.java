@@ -7,10 +7,10 @@ import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.varayasolusi.saktiauth.infrastructure.entity.AppUserAuthenticatedEntity;
-import org.varayasolusi.saktiauth.infrastructure.entityredis.UserLoginEntityRedis;
+import org.varayasolusi.saktiauth.infrastructure.entityredis.UserAuthenticatedEntityRedis;
 import org.varayasolusi.saktiauth.infrastructure.model.ResponseModel;
 import org.varayasolusi.saktiauth.infrastructure.repository.AppUserAuthenticatedRepository;
-import org.varayasolusi.saktiauth.infrastructure.repositoryredis.UserLoginRepositoryRedis;
+import org.varayasolusi.saktiauth.infrastructure.repositoryredis.UserAuthenticatedRepositoryRedis;
 import org.varayasolusi.saktiauth.utils.commons.FormatUtils;
 import org.varayasolusi.saktiauth.utils.commons.JwtTokenManager;
 import io.jsonwebtoken.Claims;
@@ -28,7 +28,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 	private JwtTokenManager jwtTokenManager;
 	
 	@Autowired
-	private UserLoginRepositoryRedis userLoginRepositoryRedis;
+	private UserAuthenticatedRepositoryRedis userLoginRepositoryRedis;
 	
 	@Override
 	public ResponseModel authenticate(String token) {
@@ -36,13 +36,12 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 		var responseModel = new ResponseModel();
 		
 		try {
-			
+
 			// check jwtToken.
 			Jws<Claims> jwtResult = jwtTokenManager.parseJwt(token);
-			
-			String jwtId = jwtResult.getBody().getId();
+			String authenticatedId = jwtResult.getBody().getId();
 			String appUserId = jwtResult.getBody().getIssuer();
-			
+
 			if (jwtTokenManager.isTokenExpired(token)) {
 				responseModel.setHttpStatusCode(401);
 				responseModel.setResponseCode("00000");
@@ -59,15 +58,13 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 	        responseModel.setTimeStamp(FormatUtils.getCurrentTimestamp());
 	        
 			// check first in REDIS.
-			boolean isAuthenticatedInRedisExist = this.isAuthenticatedInRedisExist(appUserId);
+			boolean isAuthenticatedInRedisExist = this.isAuthenticatedInRedisExist(appUserId, authenticatedId);
 			if (isAuthenticatedInRedisExist) {
-			
-				map.put("authenticationCache", "true");				
+				map.put("authenticationCache", "true");
 		        responseModel.setData(map);
 			} else {
-				
 				// check in DB.
-				boolean isAuthenticatedInDBExist = this.isAuthenticatedInDBExist(jwtId);
+				boolean isAuthenticatedInDBExist = this.isAuthenticatedInDBExist(appUserId, authenticatedId);
 				if (isAuthenticatedInDBExist) {
 					map.put("authenticationCache", "false");
 			        responseModel.setData(map);
@@ -80,35 +77,41 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 			        responseModel.setData(null);
 				}
 			}
-		} catch(SignatureException sgx) {
+		} catch(SignatureException | ExpiredJwtException sgx) {
 			responseModel.setHttpStatusCode(500);
 			responseModel.setResponseCode("00000");
 	        responseModel.setResponseMessage("internal server error");
 	        responseModel.setTimeStamp(FormatUtils.getCurrentTimestamp());
 			
 	        sgx.printStackTrace();
-	        
-		} catch(ExpiredJwtException eje) {
-			responseModel.setHttpStatusCode(500);
-			responseModel.setResponseCode("00000");
-	        responseModel.setResponseMessage("internal server error");
-	        responseModel.setTimeStamp(FormatUtils.getCurrentTimestamp());
-	        
-	        eje.printStackTrace();
 		}
-		
-		return responseModel;
+
+        return responseModel;
 
 	}
 	
-	private boolean isAuthenticatedInRedisExist(String appUserId) {
-		Optional<UserLoginEntityRedis> userLoginEntityRedis = this.userLoginRepositoryRedis.findById(appUserId);
-		return userLoginEntityRedis.isPresent();
+	private boolean isAuthenticatedInRedisExist(String appUserId, String authenticatedId) {
+		boolean isExist = true;
+
+		Optional<UserAuthenticatedEntityRedis> userAuthenticatedEntityRedis = this.userLoginRepositoryRedis.findById(appUserId);
+		if (userAuthenticatedEntityRedis.isPresent()) {
+			if (!userAuthenticatedEntityRedis.get().getAuthenticatedId().equals(authenticatedId))
+				isExist = false;
+		} else {
+			isExist = false;
+		}
+
+		return isExist;
 	}
 	
-	private boolean isAuthenticatedInDBExist(String jwtId) {
-		Optional<AppUserAuthenticatedEntity> appUserAuthenticatedEntity = this.appUserAuthenticatedRepository.findById(UUID.fromString(jwtId));
-		return appUserAuthenticatedEntity.isPresent();
+	private boolean isAuthenticatedInDBExist(String appUserId, String authenticatedId) {
+		boolean isExist = true;
+
+		Optional<AppUserAuthenticatedEntity> appUserAuthenticatedEntity = this.appUserAuthenticatedRepository.findById(UUID.fromString(authenticatedId));
+		if (appUserAuthenticatedEntity.isEmpty())
+			isExist = false;
+
+		return isExist;
 	}
 
 }
