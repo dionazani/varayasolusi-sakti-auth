@@ -4,7 +4,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.varayasolusi.saktiauth.restcontroller.emailverification.EmailVerificationReqModel;
+import org.varayasolusi.saktiauth.context.v1.emailverification.EmailVerificationReqModel;
+import org.varayasolusi.saktiauth.context.v1.emailverification.EmailVerificationService;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

@@ -8,4 +8,5 @@ import org.varayasolusi.saktiauth.infrastructure.entity.AppUserAuthenticatedEnti
 @Repository
 public interface AppUserAuthenticatedRepository extends JpaRepository<AppUserAuthenticatedEntity, UUID>{
 
+	void deleteByAppUserId(UUID appUserId);
 }
