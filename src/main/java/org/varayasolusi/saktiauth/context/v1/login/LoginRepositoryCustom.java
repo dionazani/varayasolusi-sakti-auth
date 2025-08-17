@@ -10,16 +10,16 @@ public class LoginRepositoryCustom {
     @PersistenceContext
     private EntityManager em;
 
-    public AppUserPersonEntityCustom getAppUserByEmail(String email) {
+    public AppUserAuthenticationEntityCustom getAppUserByEmail(String email) {
 
         String sql = "select app_user.id  as app_user_id, \n"
-    		+ "			app_user_person.id  as app_user_person_id,\n"
+    		+ "			app_user_login.id  as app_user_login_id,\n"
                 + "		app_user.email,\n"
-                + "		app_user_person.\"password\"\n"
-                + "from app_user_person inner join app_user on app_user.id = app_user_person.app_user_id\n"
+                + "		app_user_login.\"password\"\n"
+                + "from app_user_login inner join app_user on app_user.id = app_user_login.app_user_id\n"
                 + "where app_user.email = :appPersonEmail";
 
-        var appUserPersonEntityCustom = (AppUserPersonEntityCustom) this.em.createNativeQuery(sql, AppUserPersonEntityCustom.class)
+        var appUserPersonEntityCustom = (AppUserAuthenticationEntityCustom) this.em.createNativeQuery(sql, AppUserAuthenticationEntityCustom.class)
                 .setParameter("appPersonEmail", email)
                 .getSingleResult();
 

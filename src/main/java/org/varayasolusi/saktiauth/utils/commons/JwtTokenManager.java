@@ -34,25 +34,23 @@ public class JwtTokenManager {
 				SignatureAlgorithm.HS256.getJcaName());
 	}
 
-	public String createJwtToken(String appUserId, String id) { 
+	public String createToken(String appUserId, String id, int duration) {
 
 		Timestamp originalTimestamp = new Timestamp(System.currentTimeMillis());
-		Instant instant = originalTimestamp.toInstant().plus(Duration.ofMinutes(60));
+		Instant instant = originalTimestamp.toInstant().plus(Duration.ofSeconds(duration));
 		Timestamp newTimestamp = Timestamp.from(instant);
 		
 		System.out.println("originalTimestamp :" + originalTimestamp);
 		System.out.println("newTimestamp " + newTimestamp);
-		
-		String jwtToken = Jwts.builder()
-				.setIssuer(appUserId)
-				.setId(id)
-				.setSubject("TOKEN")
-				.setIssuedAt(originalTimestamp)
-				.setExpiration(newTimestamp)
-				.signWith(hmacKey)
-				.compact();
 
-		return jwtToken;
+        return Jwts.builder()
+                .setIssuer(appUserId)
+                .setId(id)
+                .setSubject("LOGIN")
+                .setIssuedAt(originalTimestamp)
+                .setExpiration(newTimestamp)
+                .signWith(hmacKey)
+                .compact();
 	}
 
 	public Jws<Claims> parseJwt(String jwtString) {

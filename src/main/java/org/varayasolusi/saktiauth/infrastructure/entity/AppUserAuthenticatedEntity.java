@@ -29,8 +29,17 @@ public class AppUserAuthenticatedEntity {
     @JoinColumn(name = "application_type_id", nullable = false)
     private ApplicationTypeEntity applicationType;
     
-    @Column(name = "token_value", length = 300, nullable = false)
-    private String tokenValue;
+    @Column(name = "access_token", length = 300, nullable = false)
+    private String accessToken;
+
+    @Column(name = "refresh_token", length = 300, nullable = false)
+    private String refreshToken;
+
+    @Column(name = "behaviour", length = 1, nullable = false)
+    private String behaviour;
+
+    @Column(name = "logout",  nullable = true)
+    private Timestamp logout;
     
     @CreationTimestamp
     private Timestamp createdAt;

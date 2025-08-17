@@ -11,12 +11,12 @@ import org.springframework.stereotype.Service;
 import org.varayasolusi.saktiauth.infrastructure.entity.AppUserAuthenticatedEntity;
 import org.varayasolusi.saktiauth.infrastructure.entity.AppUserEntity;
 import org.varayasolusi.saktiauth.infrastructure.entity.ApplicationTypeEntity;
-import org.varayasolusi.saktiauth.infrastructure.entityredis.UserLoginEntityRedis;
+import org.varayasolusi.saktiauth.infrastructure.entityredis.UserAuthenticatedEntityRedis;
 import org.varayasolusi.saktiauth.infrastructure.model.ResponseModel;
 import org.varayasolusi.saktiauth.infrastructure.repository.AppUserAuthenticatedRepository;
 import org.varayasolusi.saktiauth.infrastructure.repository.AppUserRepository;
 import org.varayasolusi.saktiauth.infrastructure.repository.ApplicationTypeRepository;
-import org.varayasolusi.saktiauth.infrastructure.repositoryredis.UserLoginRepositoryRedis;
+import org.varayasolusi.saktiauth.infrastructure.repositoryredis.UserAuthenticatedRepositoryRedis;
 import org.varayasolusi.saktiauth.utils.commons.FormatUtils;
 import org.varayasolusi.saktiauth.utils.commons.JwtTokenManager;
 import jakarta.persistence.NoResultException;
@@ -30,25 +30,28 @@ public class LoginServiceImpl implements LoginService {
 
 	@Autowired
 	private JwtTokenManager jwtTokenManager;
-	
-	@Autowired
-	private PasswordEncoder passwordEncoder;
-	
-	@Autowired
+
+    @Autowired
 	private AppUserAuthenticatedRepository appUserAuthenticatedRepository;
 	
 	@Autowired
 	private ApplicationTypeRepository applicationTypeRepository;
-	
+
 	@Autowired
 	private AppUserRepository appUserRepository;
-	
+
 	@Value("${id.table.applicationType.web}")
 	private String applicationTypeWebId;
-	
+
+	@Value("${jwt.expiration.access-token}")
+	private String expirationAccessToken;
+
+	@Value("${jwt.expiration.refresh-token}")
+	private String expirationRefreshToken;
+
 	@Autowired
-	private UserLoginRepositoryRedis userLoginRepositoryRedis;
-	
+	private UserAuthenticatedRepositoryRedis userAuthenticatedRepositoryRedis;
+
 	@Override
 	@Transactional
 	public ResponseModel doLogin(LoginReqModel loginReqModel) {
@@ -58,14 +61,18 @@ public class LoginServiceImpl implements LoginService {
 		try {
 			String email = loginReqModel.getUsername();
 			var appUserPersonEntityCustom = this.loginRepositoryCustom.getAppUserByEmail(email);
-			this.passwordEncoder = new BCryptPasswordEncoder();
+            PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 			
 			if (passwordEncoder.matches(loginReqModel.getPassword(), appUserPersonEntityCustom.getPassword())) {
-			
-				String jwtId = UUID.randomUUID().toString();
-				String jwtToken =  jwtTokenManager.createJwtToken(appUserPersonEntityCustom.getAppUserId(), jwtId);;
-				String appUserId = appUserPersonEntityCustom.getAppUserId();
-				
+
+				// create access token
+				String accessAuthenticatedId = UUID.randomUUID().toString();
+				String accesstoken =  jwtTokenManager.createToken(appUserPersonEntityCustom.getAppUserId(), accessAuthenticatedId, Integer.parseInt(this.expirationAccessToken));
+
+				//create refresh token
+				String refreshAuthenticatedId = UUID.randomUUID().toString();
+				String refreshToken =  jwtTokenManager.createToken(appUserPersonEntityCustom.getAppUserId(), refreshAuthenticatedId, Integer.parseInt(this.expirationRefreshToken));
+
 				// delete first app_user_authenticated by app_user_id.
 				this.appUserAuthenticatedRepository.deleteByAppUserId(UUID.fromString(appUserPersonEntityCustom.getAppUserId()));
 				
@@ -73,27 +80,39 @@ public class LoginServiceImpl implements LoginService {
 				ApplicationTypeEntity applicationTypeEntity = applicationTypeRepository.getReferenceById(UUID.fromString(applicationTypeWebId));
 				
 				// get appUserId
+				String appUserId = appUserPersonEntityCustom.getAppUserId();
 				AppUserEntity appUserEntity = appUserRepository.getReferenceById(UUID.fromString(appUserId));
 				
 				// insert into AppUserAuthenticatedEntity;
 				var appUserAuthenticatedEntity = new AppUserAuthenticatedEntity();
-				appUserAuthenticatedEntity.setId(UUID.fromString(jwtId));
+				appUserAuthenticatedEntity.setId(UUID.fromString(accessAuthenticatedId));
 				appUserAuthenticatedEntity.setApplicationType(applicationTypeEntity);
 				appUserAuthenticatedEntity.setAppUser(appUserEntity);
-				appUserAuthenticatedEntity.setTokenValue(jwtToken);
+				appUserAuthenticatedEntity.setAccessToken(accesstoken);
+				appUserAuthenticatedEntity.setRefreshToken(refreshToken);
+				appUserAuthenticatedEntity.setBehaviour("L");
 				appUserAuthenticatedRepository.save(appUserAuthenticatedEntity);
 				
 				// add to redis, but it need to be deleted first.
-				var userLoginEntityRedis = new UserLoginEntityRedis();
-				userLoginEntityRedis.setAppUserId(appUserId);
-				userLoginEntityRedis.setJwtToken(jwtToken);
-				userLoginEntityRedis.setCreatedAt(String.valueOf(FormatUtils.getCurrentTimestamp()));
-				userLoginEntityRedis.setUpdatedAt(String.valueOf(FormatUtils.getCurrentTimestamp()));
-				this.userLoginRepositoryRedis.save(userLoginEntityRedis);
-				
+				System.out.println(accessAuthenticatedId);
+				this.userAuthenticatedRepositoryRedis.deleteById(appUserId);
+
+				var userAuthenticatedEntityRedisEntityRedis = new UserAuthenticatedEntityRedis();
+				userAuthenticatedEntityRedisEntityRedis.setId(appUserId);
+				userAuthenticatedEntityRedisEntityRedis.setAuthenticatedId(accessAuthenticatedId);
+				userAuthenticatedEntityRedisEntityRedis.setAppUserId(appUserId);
+				userAuthenticatedEntityRedisEntityRedis.setAccessToken(accesstoken);
+				userAuthenticatedEntityRedisEntityRedis.setRefreshToken(refreshToken);
+				userAuthenticatedEntityRedisEntityRedis.setBehaviour("L");
+				userAuthenticatedEntityRedisEntityRedis.setCreatedAt(String.valueOf(FormatUtils.getCurrentTimestamp()));
+				userAuthenticatedEntityRedisEntityRedis.setUpdatedAt(String.valueOf(FormatUtils.getCurrentTimestamp()));
+				this.userAuthenticatedRepositoryRedis.save(userAuthenticatedEntityRedisEntityRedis);
+
 				// set Response by Map;
 				Map<String, String> map = new HashMap<String, String>();
-				map.put("accessToken", jwtToken);
+				map.put("behaviour", "L");
+				map.put("accessToken", accesstoken);
+				map.put("refreshToken", refreshToken);
 
 				responseModel = new ResponseModel();
 				responseModel.setHttpStatusCode(200);
