@@ -38,22 +38,27 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 		try {
 
 			// check jwtToken.
-			Jws<Claims> jwtResult = jwtTokenManager.parseJwt(token);
+            Jws<Claims> jwtResult = null;
+            try {
+                jwtResult = jwtTokenManager.parseJwt(token);
+            }
+			catch(ExpiredJwtException eje) {
+                responseModel.setHttpStatusCode(401);
+                responseModel.setResponseCode("001.03.001");
+                responseModel.setResponseMessage("invalid token");
+                responseModel.setTimeStamp(FormatUtils.getCurrentTimestamp());
+
+                return responseModel;
+            }
+
 			String authenticatedId = jwtResult.getBody().getId();
 			String appUserId = jwtResult.getBody().getIssuer();
-
-			if (jwtTokenManager.isTokenExpired(token)) {
-				responseModel.setHttpStatusCode(401);
-				responseModel.setResponseCode("00000");
-		        responseModel.setResponseMessage("invalid token");
-		        responseModel.setTimeStamp(FormatUtils.getCurrentTimestamp());
-			}
 			
 			// set response API.
 			Map<String, String> map = new HashMap<String, String>();
 
 			responseModel.setHttpStatusCode(200);
-			responseModel.setResponseCode("00000");
+			responseModel.setResponseCode("001.00.000");
 	        responseModel.setResponseMessage("success");
 	        responseModel.setTimeStamp(FormatUtils.getCurrentTimestamp());
 	        
@@ -71,10 +76,12 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 				}
 				else {
 					responseModel.setHttpStatusCode(401);
-					responseModel.setResponseCode("00000");
-			        responseModel.setResponseMessage("unauthorized");
+					responseModel.setResponseCode("001.03.002");
+			        responseModel.setResponseMessage("invalid token");
 			        responseModel.setTimeStamp(FormatUtils.getCurrentTimestamp());
 			        responseModel.setData(null);
+
+                    return responseModel;
 				}
 			}
 		} catch(SignatureException | ExpiredJwtException sgx) {
@@ -82,8 +89,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 			responseModel.setResponseCode("00000");
 	        responseModel.setResponseMessage("internal server error");
 	        responseModel.setTimeStamp(FormatUtils.getCurrentTimestamp());
-			
-	        sgx.printStackTrace();
+
+            return responseModel;
 		}
 
         return responseModel;

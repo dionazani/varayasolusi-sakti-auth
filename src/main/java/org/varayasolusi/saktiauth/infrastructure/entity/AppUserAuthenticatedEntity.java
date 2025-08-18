@@ -28,7 +28,13 @@ public class AppUserAuthenticatedEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "application_type_id", nullable = false)
     private ApplicationTypeEntity applicationType;
-    
+
+    @Column(name = "authenticated_type", length = 10, nullable = false)
+    private String authenticatedType;
+
+    @Column(name = "token_type", length = 10, nullable = false)
+    private String tokenType;
+
     @Column(name = "access_token", length = 300, nullable = false)
     private String accessToken;
 
