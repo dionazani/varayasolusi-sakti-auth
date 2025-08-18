@@ -17,6 +17,7 @@ import org.varayasolusi.saktiauth.infrastructure.repository.AppUserAuthenticated
 import org.varayasolusi.saktiauth.infrastructure.repository.AppUserRepository;
 import org.varayasolusi.saktiauth.infrastructure.repository.ApplicationTypeRepository;
 import org.varayasolusi.saktiauth.infrastructure.repositoryredis.UserAuthenticatedRepositoryRedis;
+import org.varayasolusi.saktiauth.utils.commons.FinalKey;
 import org.varayasolusi.saktiauth.utils.commons.FormatUtils;
 import org.varayasolusi.saktiauth.utils.commons.JwtTokenManager;
 import jakarta.persistence.NoResultException;
@@ -85,12 +86,14 @@ public class LoginServiceImpl implements LoginService {
 				
 				// insert into AppUserAuthenticatedEntity;
 				var appUserAuthenticatedEntity = new AppUserAuthenticatedEntity();
+                appUserAuthenticatedEntity.setAppUser(appUserEntity);
 				appUserAuthenticatedEntity.setId(UUID.fromString(accessAuthenticatedId));
 				appUserAuthenticatedEntity.setApplicationType(applicationTypeEntity);
-				appUserAuthenticatedEntity.setAppUser(appUserEntity);
+                appUserAuthenticatedEntity.setAuthenticatedType(FinalKey.USERAUTHENTICATED_AUTHENTICATIONTYPE);
+                appUserAuthenticatedEntity.setTokenType(FinalKey.USERAUTHENTICATED_TOKENTYPE);
 				appUserAuthenticatedEntity.setAccessToken(accesstoken);
 				appUserAuthenticatedEntity.setRefreshToken(refreshToken);
-				appUserAuthenticatedEntity.setBehaviour("L");
+				appUserAuthenticatedEntity.setBehaviour(FinalKey.USERAUTHENTICATED_BEHAVIOUR);
 				appUserAuthenticatedRepository.save(appUserAuthenticatedEntity);
 				
 				// add to redis, but it need to be deleted first.
@@ -116,7 +119,7 @@ public class LoginServiceImpl implements LoginService {
 
 				responseModel = new ResponseModel();
 				responseModel.setHttpStatusCode(200);
-				responseModel.setResponseCode("00000");
+				responseModel.setResponseCode("001.00.000");
 		        responseModel.setResponseMessage("succes");
 		        responseModel.setTimeStamp(FormatUtils.getCurrentTimestamp());
 		        responseModel.setData(map);
@@ -125,7 +128,7 @@ public class LoginServiceImpl implements LoginService {
 			else {
 				responseModel = new ResponseModel();
 				responseModel.setHttpStatusCode(401);
-				responseModel.setResponseCode("00000");
+				responseModel.setResponseCode("001.03.004");
 				responseModel.setResponseMessage("unauthorized");
 				responseModel.setTimeStamp(FormatUtils.getCurrentTimestamp());
 				responseModel.setData(null);
