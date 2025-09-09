@@ -1,0 +1,1 @@
+This is add-on file should not bring to Git.

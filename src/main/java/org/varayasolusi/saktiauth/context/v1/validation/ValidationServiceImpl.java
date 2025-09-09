@@ -44,7 +44,7 @@ public class ValidationServiceImpl implements ValidationService {
             }
 			catch(ExpiredJwtException eje) {
                 responseModel.setHttpStatusCode(401);
-                responseModel.setResponseCode("001.03.001");
+                responseModel.setResponseCode("0006.003");
                 responseModel.setResponseMessage("invalid token");
                 responseModel.setTimeStamp(FormatUtils.getCurrentTimestamp());
 
@@ -58,7 +58,7 @@ public class ValidationServiceImpl implements ValidationService {
 			Map<String, String> map = new HashMap<String, String>();
 
 			responseModel.setHttpStatusCode(200);
-			responseModel.setResponseCode("001.00.000");
+			responseModel.setResponseCode("0011.000");
 	        responseModel.setResponseMessage("success");
 	        responseModel.setTimeStamp(FormatUtils.getCurrentTimestamp());
 	        
@@ -76,7 +76,7 @@ public class ValidationServiceImpl implements ValidationService {
 				}
 				else {
 					responseModel.setHttpStatusCode(401);
-					responseModel.setResponseCode("001.03.002");
+					responseModel.setResponseCode("0006.003");
 			        responseModel.setResponseMessage("invalid token");
 			        responseModel.setTimeStamp(FormatUtils.getCurrentTimestamp());
 			        responseModel.setData(null);
@@ -86,7 +86,7 @@ public class ValidationServiceImpl implements ValidationService {
 			}
 		} catch(SignatureException | ExpiredJwtException sgx) {
 			responseModel.setHttpStatusCode(500);
-			responseModel.setResponseCode("00000");
+			responseModel.setResponseCode("0016.003");
 	        responseModel.setResponseMessage("internal server error");
 	        responseModel.setTimeStamp(FormatUtils.getCurrentTimestamp());
 
