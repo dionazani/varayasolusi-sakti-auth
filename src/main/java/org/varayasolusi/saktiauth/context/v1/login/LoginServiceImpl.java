@@ -119,7 +119,7 @@ public class LoginServiceImpl implements LoginService {
 
 				responseModel = new ResponseModel();
 				responseModel.setHttpStatusCode(200);
-				responseModel.setResponseCode("001.00.000");
+				responseModel.setResponseCode("0001.000");
 		        responseModel.setResponseMessage("succes");
 		        responseModel.setTimeStamp(FormatUtils.getCurrentTimestamp());
 		        responseModel.setData(map);

@@ -10,13 +10,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/v1/login")
+@RequestMapping("/v1/auth/login")
 public class LoginRestController {
 
     @Autowired
     private LoginService loginService;
 
-    @PostMapping(path= "/", consumes = "application/json", produces = "application/json")
+    @PostMapping(path= "", consumes = "application/json", produces = "application/json")
     public ResponseEntity<Object> login(@RequestBody LoginReqModel loginReqModel) {
         ResponseEntity<Object> responseEntity = null;
 
