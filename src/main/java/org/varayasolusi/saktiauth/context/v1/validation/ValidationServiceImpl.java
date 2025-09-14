@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.varayasolusi.saktiauth.infrastructure.entity.AppUserAuthenticatedEntity;
 import org.varayasolusi.saktiauth.infrastructure.entityredis.UserAuthenticatedEntityRedis;
-import org.varayasolusi.saktiauth.infrastructure.model.ResponseModel;
+import org.varayasolusi.saktiauth.infrastructure.dto.ResponseDTO;
 import org.varayasolusi.saktiauth.infrastructure.repository.AppUserAuthenticatedRepository;
 import org.varayasolusi.saktiauth.infrastructure.repositoryredis.UserAuthenticatedRepositoryRedis;
 import org.varayasolusi.saktiauth.utils.commons.FormatUtils;
@@ -31,9 +31,9 @@ public class ValidationServiceImpl implements ValidationService {
 	private UserAuthenticatedRepositoryRedis userLoginRepositoryRedis;
 	
 	@Override
-	public ResponseModel authenticate(String token) {
+	public ResponseDTO authenticate(String token) {
 		
-		var responseModel = new ResponseModel();
+		var responseDTO = new ResponseDTO();
 		
 		try {
 
@@ -43,12 +43,12 @@ public class ValidationServiceImpl implements ValidationService {
                 jwtResult = jwtTokenManager.parseJwt(token);
             }
 			catch(ExpiredJwtException eje) {
-                responseModel.setHttpStatusCode(401);
-                responseModel.setResponseCode("0006.003");
-                responseModel.setResponseMessage("invalid token");
-                responseModel.setTimeStamp(FormatUtils.getCurrentTimestamp());
+                responseDTO.setHttpStatusCode(401);
+                responseDTO.setResponseCode("0006.003");
+                responseDTO.setResponseMessage("invalid token");
+                responseDTO.setTimeStamp(FormatUtils.getCurrentTimestamp());
 
-                return responseModel;
+                return responseDTO;
             }
 
 			String authenticatedId = jwtResult.getBody().getId();
@@ -57,43 +57,43 @@ public class ValidationServiceImpl implements ValidationService {
 			// set response API.
 			Map<String, String> map = new HashMap<String, String>();
 
-			responseModel.setHttpStatusCode(200);
-			responseModel.setResponseCode("0011.000");
-	        responseModel.setResponseMessage("success");
-	        responseModel.setTimeStamp(FormatUtils.getCurrentTimestamp());
+			responseDTO.setHttpStatusCode(200);
+			responseDTO.setResponseCode("0011.000");
+	        responseDTO.setResponseMessage("success");
+	        responseDTO.setTimeStamp(FormatUtils.getCurrentTimestamp());
 	        
 			// check first in REDIS.
 			boolean isAuthenticatedInRedisExist = this.isAuthenticatedInRedisExist(appUserId, authenticatedId);
 			if (isAuthenticatedInRedisExist) {
 				map.put("authenticationCache", "true");
-		        responseModel.setData(map);
+		        responseDTO.setData(map);
 			} else {
 				// check in DB.
 				boolean isAuthenticatedInDBExist = this.isAuthenticatedInDBExist(appUserId, authenticatedId);
 				if (isAuthenticatedInDBExist) {
 					map.put("authenticationCache", "false");
-			        responseModel.setData(map);
+			        responseDTO.setData(map);
 				}
 				else {
-					responseModel.setHttpStatusCode(401);
-					responseModel.setResponseCode("0006.003");
-			        responseModel.setResponseMessage("invalid token");
-			        responseModel.setTimeStamp(FormatUtils.getCurrentTimestamp());
-			        responseModel.setData(null);
+					responseDTO.setHttpStatusCode(401);
+					responseDTO.setResponseCode("0006.003");
+			        responseDTO.setResponseMessage("invalid token");
+			        responseDTO.setTimeStamp(FormatUtils.getCurrentTimestamp());
+			        responseDTO.setData(null);
 
-                    return responseModel;
+                    return responseDTO;
 				}
 			}
 		} catch(SignatureException | ExpiredJwtException sgx) {
-			responseModel.setHttpStatusCode(500);
-			responseModel.setResponseCode("0016.003");
-	        responseModel.setResponseMessage("internal server error");
-	        responseModel.setTimeStamp(FormatUtils.getCurrentTimestamp());
+			responseDTO.setHttpStatusCode(500);
+			responseDTO.setResponseCode("0016.003");
+	        responseDTO.setResponseMessage("internal server error");
+	        responseDTO.setTimeStamp(FormatUtils.getCurrentTimestamp());
 
-            return responseModel;
+            return responseDTO;
 		}
 
-        return responseModel;
+        return responseDTO;
 
 	}
 	

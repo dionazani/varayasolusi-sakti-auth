@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.varayasolusi.saktiauth.context.v1.login.LoginReqModel;
+import org.varayasolusi.saktiauth.context.v1.login.LoginReqDTO;
 import org.varayasolusi.saktiauth.context.v1.login.LoginService;
 
 @SpringBootTest
@@ -17,7 +17,7 @@ public class LoginUnitTest {
 	@Test
 	public void shouldDoLogin() {
 
-		var loginReqModel = new LoginReqModel();
+		var loginReqModel = new LoginReqDTO();
 		loginReqModel.setUsername("dion.azani@gmail.com");
 		loginReqModel.setPassword("1234");
 		var responseModel = loginService.doLogin(loginReqModel);

@@ -4,7 +4,7 @@ import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.varayasolusi.saktiauth.infrastructure.model.EmailModel;
+import org.varayasolusi.saktiauth.infrastructure.dto.EmailDTO;
 
 @Service
 public class SignUpSendToMq {
@@ -18,7 +18,7 @@ public class SignUpSendToMq {
 	@Value("${rabbitmq.saktiauth.signup-email.routing-key}")
 	private String signUpEmailRoutingKey;
 	
-	public void send(EmailModel emailModel) {
+	public void send(EmailDTO emailModel) {
 		System.out.println("Send model = " + emailModel);
 		rabbitTemplate.convertAndSend(exchangeDirect, signUpEmailRoutingKey, emailModel);
 	}

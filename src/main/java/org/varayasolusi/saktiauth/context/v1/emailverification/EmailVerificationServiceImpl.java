@@ -9,8 +9,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.varayasolusi.saktiauth.infrastructure.entity.*;
-import org.varayasolusi.saktiauth.infrastructure.model.ResponseModel;
-import org.varayasolusi.saktiauth.infrastructure.model.SignUpDescModel;
+import org.varayasolusi.saktiauth.infrastructure.dto.ResponseDTO;
+import org.varayasolusi.saktiauth.infrastructure.dto.SignUpDescDTO;
 import org.varayasolusi.saktiauth.infrastructure.repository.*;
 import org.varayasolusi.saktiauth.utils.commons.FormatUtils;
 import java.util.Calendar;
@@ -54,12 +54,12 @@ public class EmailVerificationServiceImpl implements EmailVerificationService {
  
     @Transactional
     @Override
-    public ResponseModel verify(EmailVerificationReqModel emailVerificationReqModel) throws JsonProcessingException {
+    public ResponseDTO verify(EmailVerificationReqModel emailVerificationReqModel) throws JsonProcessingException {
 
     	String signUpId = emailVerificationReqModel.getSignUpId();
     	
     	if (this.isAppUserExist(signUpId)) {
-    		var responseModel = new ResponseModel();
+    		var responseModel = new ResponseDTO();
             responseModel.setHttpStatusCode(400);
             responseModel.setResponseMessage("object has been exist");
             responseModel.setTimeStamp(FormatUtils.getCurrentTimestamp());
@@ -73,7 +73,7 @@ public class EmailVerificationServiceImpl implements EmailVerificationService {
         //extract JSON
         String json = signUpEntity.getReqDesc();
         ObjectMapper objectMapper = new ObjectMapper();
-        var signUpDescModel = objectMapper.readValue(json, SignUpDescModel.class);
+        var signUpDescModel = objectMapper.readValue(json, SignUpDescDTO.class);
 
         // insert into app_user
         var appUserEntity = new AppUserEntity();
@@ -135,7 +135,7 @@ public class EmailVerificationServiceImpl implements EmailVerificationService {
  			map.put("mqError", exception.toString());
  		}
  		
-        var responseModel = new ResponseModel();
+        var responseModel = new ResponseDTO();
         responseModel.setHttpStatusCode(200);
         responseModel.setResponseMessage("success");
         responseModel.setTimeStamp(FormatUtils.getCurrentTimestamp());

@@ -17,7 +17,7 @@ public class LoginRestController {
     private LoginService loginService;
 
     @PostMapping(path= "", consumes = "application/json", produces = "application/json")
-    public ResponseEntity<Object> login(@RequestBody LoginReqModel loginReqModel) {
+    public ResponseEntity<Object> login(@RequestBody LoginReqDTO loginReqModel) {
         ResponseEntity<Object> responseEntity = null;
 
         try {
