@@ -17,7 +17,7 @@ public class SignUpRestController {
 	private SignUpService signUpService;
 	
 	@PostMapping(path= "/", consumes = "application/json", produces = "application/json")
-	public ResponseEntity<Object> addNew(@RequestBody SignUpReqModel signUpReqModel) {
+	public ResponseEntity<Object> addNew(@RequestBody SignUpReqDTO signUpReqModel) {
 		
 		ResponseEntity<Object> responseEntity = null;
 		

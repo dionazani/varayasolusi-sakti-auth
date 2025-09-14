@@ -12,7 +12,7 @@ import org.varayasolusi.saktiauth.infrastructure.entity.AppUserAuthenticatedEnti
 import org.varayasolusi.saktiauth.infrastructure.entity.AppUserEntity;
 import org.varayasolusi.saktiauth.infrastructure.entity.ApplicationTypeEntity;
 import org.varayasolusi.saktiauth.infrastructure.entityredis.UserAuthenticatedEntityRedis;
-import org.varayasolusi.saktiauth.infrastructure.model.ResponseModel;
+import org.varayasolusi.saktiauth.infrastructure.dto.ResponseDTO;
 import org.varayasolusi.saktiauth.infrastructure.repository.AppUserAuthenticatedRepository;
 import org.varayasolusi.saktiauth.infrastructure.repository.AppUserRepository;
 import org.varayasolusi.saktiauth.infrastructure.repository.ApplicationTypeRepository;
@@ -55,16 +55,16 @@ public class LoginServiceImpl implements LoginService {
 
 	@Override
 	@Transactional
-	public ResponseModel doLogin(LoginReqModel loginReqModel) {
+	public ResponseDTO doLogin(LoginReqDTO loginReqDTO) {
 		
-		ResponseModel responseModel = null;
+		ResponseDTO responseDTO = null;
 		
 		try {
-			String email = loginReqModel.getUsername();
+			String email = loginReqDTO.getUsername();
 			var appUserPersonEntityCustom = this.loginRepositoryCustom.getAppUserByEmail(email);
             PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 			
-			if (passwordEncoder.matches(loginReqModel.getPassword(), appUserPersonEntityCustom.getPassword())) {
+			if (passwordEncoder.matches(loginReqDTO.getPassword(), appUserPersonEntityCustom.getPassword())) {
 
 				// create access token
 				String accessAuthenticatedId = UUID.randomUUID().toString();
@@ -117,32 +117,32 @@ public class LoginServiceImpl implements LoginService {
 				map.put("accessToken", accesstoken);
 				map.put("refreshToken", refreshToken);
 
-				responseModel = new ResponseModel();
-				responseModel.setHttpStatusCode(200);
-				responseModel.setResponseCode("0001.000");
-		        responseModel.setResponseMessage("succes");
-		        responseModel.setTimeStamp(FormatUtils.getCurrentTimestamp());
-		        responseModel.setData(map);
+				responseDTO = new ResponseDTO();
+				responseDTO.setHttpStatusCode(200);
+				responseDTO.setResponseCode("0001.000");
+		        responseDTO.setResponseMessage("succes");
+		        responseDTO.setTimeStamp(FormatUtils.getCurrentTimestamp());
+		        responseDTO.setData(map);
 		        
 			}
 			else {
-				responseModel = new ResponseModel();
-				responseModel.setHttpStatusCode(401);
-				responseModel.setResponseCode("001.03.004");
-				responseModel.setResponseMessage("unauthorized");
-				responseModel.setTimeStamp(FormatUtils.getCurrentTimestamp());
-				responseModel.setData(null);
+				responseDTO = new ResponseDTO();
+				responseDTO.setHttpStatusCode(401);
+				responseDTO.setResponseCode("001.03.004");
+				responseDTO.setResponseMessage("unauthorized");
+				responseDTO.setTimeStamp(FormatUtils.getCurrentTimestamp());
+				responseDTO.setData(null);
 			}
 		}
 		catch(NoResultException nre) {
-			responseModel = new ResponseModel();
-			responseModel.setHttpStatusCode(500);
-			responseModel.setResponseCode("00000");
-	        responseModel.setResponseMessage("error");
-	        responseModel.setTimeStamp(FormatUtils.getCurrentTimestamp());
-	        responseModel.setData(null);
+			responseDTO = new ResponseDTO();
+			responseDTO.setHttpStatusCode(500);
+			responseDTO.setResponseCode("00000");
+	        responseDTO.setResponseMessage("error");
+	        responseDTO.setTimeStamp(FormatUtils.getCurrentTimestamp());
+	        responseDTO.setData(null);
 		}
 		
-		return responseModel;
+		return responseDTO;
 	}
 }
