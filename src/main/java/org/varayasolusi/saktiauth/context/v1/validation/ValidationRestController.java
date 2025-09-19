@@ -10,14 +10,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/v1/auth/authentication")
+@RequestMapping("/v1/auth/validation")
 public class ValidationRestController {
 	
 	@Autowired
 	private ValidationService authenticationService;
 	
-	@GetMapping(path= "/", produces = "application/json")
-    public ResponseEntity<Object> authenticate(@RequestHeader(name="Authorization") String token) {
+	@GetMapping(path= "", produces = "application/json")
+    public ResponseEntity<Object> validation(@RequestHeader(name="Authorization") String token) {
 
 		ResponseEntity<Object> responseEntity = null;
         try {
